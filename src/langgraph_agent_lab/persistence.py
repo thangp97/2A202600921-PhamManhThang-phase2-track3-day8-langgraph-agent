@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 
@@ -23,10 +24,17 @@ def build_checkpointer(kind: str = "memory", database_url: str | None = None) ->
 
         return MemorySaver()
     if kind == "sqlite":
-        raise NotImplementedError(
-            "TODO(student): implement SQLite checkpointer. "
-            "Hint: pip install langgraph-checkpoint-sqlite, then use SqliteSaver"
-        )
+        import sqlite3
+
+        from langgraph.checkpoint.sqlite import SqliteSaver
+
+        # database_url: "sqlite:///path.db" hoặc đường dẫn thẳng; mặc định trong outputs/
+        db_path = (database_url or "outputs/checkpoints.sqlite").removeprefix("sqlite:///")
+        Path(db_path).parent.mkdir(parents=True, exist_ok=True)
+        conn = sqlite3.connect(db_path, check_same_thread=False)
+        # WAL: đọc/ghi đồng thời, bền khi crash
+        conn.execute("PRAGMA journal_mode=WAL;")
+        return SqliteSaver(conn=conn)
     if kind == "postgres":
         raise NotImplementedError(
             "TODO(student): implement Postgres checkpointer (optional extension)"

@@ -44,7 +44,10 @@ class AgentState(TypedDict, total=False):
     TODO(student): decide which fields should be append-only and which should be overwritten.
     The current annotations give a safe starting point for auditability.
     """
-
+    evaluation_result: str
+    pending_question: str
+    proposed_action: str
+    approval: dict[str, Any]
     thread_id: str
     scenario_id: str
     query: str
